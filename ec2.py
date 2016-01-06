@@ -91,7 +91,7 @@ if args.sshid > 0:
         else:
             sship = sshcmdq[5]
         cmd = ['/usr/bin/ssh', '-i', mykeys+'/'+sshcmdq[3]+'.pem', args.user+'@'+sship]
-        print('running:', '/usr/bin/ssh -i', mykeys+'/'+sshcmdq[3]+'.pem', args.user+'@'+sship)
+        print('running:', ' '.join(cmd))
         subprocess.call(cmd)
 
 if args.tableupdate != True and not args.sshid > 0:
