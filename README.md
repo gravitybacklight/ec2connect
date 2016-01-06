@@ -26,6 +26,7 @@ This will create a sqlite file in your home directory populated with the ec2 ins
 ## Second Run
     python3 ec2.py
 or
+
     python3 ec2.py -l
 
 Will list all the instances stored in the local sqlite file. It also stores tags, currently: customer, project, env. Change to suit
@@ -38,7 +39,7 @@ Will list all the instances stored in the local sqlite file. It also stores tags
 Will empty and repopulate your local sqlite file.
 
 ## Connect
-    python ec2 -s 1
+    python3 ec2.py -s 1
 
 Will SSH to the machine with an ID of 1, example output above.
 
@@ -46,3 +47,15 @@ Will SSH to the machine with an ID of 1, example output above.
     python3 ec2.py -s 1 -su ubuntu
 
 The script defaults to using ec2-user as the ec2 user account to use.
+
+## Internal IP
+    python3 ec2.py -s 1 -i
+
+Uses the internal IP even if the external IP exists. Uses internal IP if no external IP exists.
+
+## TOO MUCH TYPING
+    alias ec2="/home/user/ec2.py"
+
+Stick an alias in your .bashrc file and mark the script as executable.
+
+
