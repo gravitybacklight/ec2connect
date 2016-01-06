@@ -28,7 +28,7 @@ CREATE TABLE "ec2" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE ,
 """
 
 def updatetable(dbconnect):
-    global uw1, ew1, as1
+    global uw1, ew1
     cursor = dbconnect.cursor()
     cursor.execute("DELETE FROM ec2")
     dbconnect.commit()
