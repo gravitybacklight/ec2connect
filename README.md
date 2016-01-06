@@ -56,6 +56,7 @@ Uses the internal IP even if the external IP exists. Uses internal IP if no exte
 ## TOO MUCH TYPING
     alias ec2="/home/user/ec2.py"
 
-Stick an alias in your .bashrc file and mark the script as executable.
+Stick an alias in your .bashrc file and mark the script as executable. Then it's as simple as:
 
+    ec2
 
