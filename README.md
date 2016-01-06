@@ -51,7 +51,7 @@ The script defaults to using ec2-user as the ec2 user account to use.
 ## Internal IP
     python3 ec2.py -s 1 -i
 
-Uses the internal IP even if the external IP exists. Uses internal IP if no external IP exists.
+Uses the internal IP even if the external IP exists. Script uses internal IP if no external IP exists.
 
 ## TOO MUCH TYPING
     alias ec2="/home/user/ec2.py"
