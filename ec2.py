@@ -34,7 +34,7 @@ def updatetable(dbconnect):
     dbconnect.commit()
     addinstances = []
     for region in uw1, ew1:
-        instances = region.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+        instances = region.instances.all()
         for i in instances:
             tagname, tagcustomer, tagproject, tagenv = '', '', '', ''
             for tag in i.tags:
