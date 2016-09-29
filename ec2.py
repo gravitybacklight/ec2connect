@@ -16,9 +16,7 @@ args = parser.parse_args()
 #config
 databasefile = os.path.expanduser('~')+'/aws.sqlite'
 mykeys = os.path.expanduser('~')+'/Keys'
-uw1 = boto3.resource('ec2', region_name='us-east-1')
-ew1 = boto3.resource('ec2', region_name='eu-west-1')
-
+regions = ['us-east-1', 'eu-west-1', 'ap-southeast-1']
 #CREATE TABLE
 createtable = """
 CREATE TABLE "ec2" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE ,
@@ -27,28 +25,30 @@ CREATE TABLE "ec2" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE ,
 "customer" VARCHAR, "project" VARCHAR, "env" VARCHAR, "vpc_id" CHAR, "region" CHAR)
 """
 
-def updatetable(dbconnect):
-    global uw1, ew1
+def updatetable(dbconnect, regions):
     cursor = dbconnect.cursor()
     cursor.execute("DELETE FROM ec2")
     dbconnect.commit()
-    addinstances = []
-    for region in uw1, ew1:
-        instances = region.instances.all()
-        for i in instances:
+    for region in regions:
+        addinstances = []
+        print('connecting to', region)
+        ec2 = boto3.resource('ec2', region_name=region)
+        for i in ec2.instances.filter(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}]).page_size(10):
             tagname, tagcustomer, tagproject, tagenv = '', '', '', ''
-            for tag in i.tags:
-                if tag['Key']=='Name':
-                    tagname = tag['Value']
-                if tag['Key']=='customer':
-                    tagcustomer = tag['Value']
-                if tag['Key']=='project':
-                    tagproject = tag['Value']
-                if tag['Key']=='env':
-                    tagenv = tag['Value']
+            if i.tags:
+                for tag in i.tags:
+                    if tag['Key']=='Name':
+                        tagname = tag['Value']
+                    if tag['Key']=='customer':
+                        tagcustomer = tag['Value']
+                    if tag['Key']=='project':
+                        tagproject = tag['Value']
+                    if tag['Key']=='env':
+                        tagenv = tag['Value']
             addinstances.append((i.instance_id, i.instance_type, i.key_name, i.private_ip_address, i.public_ip_address, tagname, tagcustomer, tagproject, tagenv, i.vpc_id, i.placement['AvailabilityZone']))
-    cursor.executemany("INSERT INTO ec2 (instance_id, instance_type, key_name, private_ip_address, public_ip_address, name, customer, project, env, vpc_id, region) VALUES (?,?,?,?,?,?,?,?,?,?,?)", addinstances)
-    dbconnect.commit()
+        cursor.executemany("INSERT INTO ec2 (instance_id, instance_type, key_name, private_ip_address, public_ip_address, name, customer, project, env, vpc_id, region) VALUES (?,?,?,?,?,?,?,?,?,?,?)", addinstances)
+        dbconnect.commit()
+        print('finished with', region)
     print('db table updated')
 
 def tablelist(dbconnect):
@@ -60,7 +60,11 @@ def tablelist(dbconnect):
             extip = '                 '
         else:
             extip = singleinstance[5].ljust(17)
-        print('{0:03d}'.format(singleinstance[0]), extip, singleinstance[4].ljust(17), singleinstance[7].ljust(10), singleinstance[8].ljust(21), singleinstance[9].ljust(11), singleinstance[6])
+        if singleinstance[4] is None:
+            intip = '                 '
+        else:
+            intip = singleinstance[4].ljust(17)
+        print('{0:03d}'.format(singleinstance[0]), extip, intip, singleinstance[7].ljust(10), singleinstance[8].ljust(21), singleinstance[9].ljust(11), singleinstance[6])
 
 dbconnect = sqlite3.connect(databasefile)
 
@@ -75,7 +79,7 @@ else:
 
 if args.tableupdate == True:
     print('updating db table')
-    updatetable(dbconnect)
+    updatetable(dbconnect, regions)
 
 if args.sshid > 0:
     sshsql = "SELECT * from ec2 WHERE id=?"
@@ -99,4 +103,3 @@ if args.tableupdate != True and not args.sshid > 0:
 
 if args.listtable == True:
     tablelist(dbconnect)
-
